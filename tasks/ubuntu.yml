@@ -1,0 +1,47 @@
+---
+# tasks file for ansible-oracle-java
+
+- name: "Ubuntu: update and install pacakge needed to add the repository"
+  apt:
+    name: "{{ item }}"
+    update_cache: yes
+  become: yes
+  with_items:
+    - python-apt
+    - software-properties-common
+  when: java_installed.rc != 0
+
+- name: Add repositories
+  apt_repository:
+    repo: ppa:webupd8team/java
+  become: yes
+  when:
+    - java_installed.rc != 0
+
+- name: Update
+  apt:
+    update_cache: yes
+  become: yes
+  when:
+    - java_installed.rc != 0
+
+- name: Accept Oracle license
+  debconf:
+    name='oracle-java{{ oracle_java_version }}-installer'
+    question='shared/accepted-oracle-license-v1-1'
+    value='true'
+    vtype='select'
+  become: yes
+  when:
+    - java_installed.rc != 0
+
+- name: Install Oracle java package
+  apt:
+    name: "{{ item }}"
+  become: yes
+  with_items:
+    - oracle-java{{ oracle_java_version }}-installer
+    - oracle-java{{ oracle_java_version }}-set-default
+  when:
+    - java_installed.rc != 0
+

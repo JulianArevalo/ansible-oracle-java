@@ -1,0 +1,26 @@
+---
+# tasks file for ansible-oracle-java
+
+# Java special setup due to issues via homebrew module
+- name: Create temp folder.
+  tempfile:
+    state: directory
+  register: temp
+
+- name: Create askpass script
+  shell: printf "#!/bin/sh\necho {{ ansible_ssh_pass }}\n" > {{ temp.path }}/askpass &&  chmod u+x {{ temp.path }}/askpass && export SUDO_ASKPASS={{ temp.path }}/askpass
+  register: askpass
+
+- name: Install java cask
+  shell: export SUDO_ASKPASS={{ temp.path }}/askpass && export PATH=/usr/local/bin:$PATH && brew cask install java{{ oracle_java_version }}
+
+- name: Clean up temp folder.
+  file:
+    path: "{{temp.path}}"
+    state: absent
+  when: temp is defined and temp.path is defined
+
+- name: Disable auto-update
+  shell: /usr/bin/defaults write /Library/Preferences/com.oracle.java.Java-Updater.plist JavaAutoUpdateEnabled -bool false
+  become: yes
+

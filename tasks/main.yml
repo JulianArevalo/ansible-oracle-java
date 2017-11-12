@@ -1,0 +1,31 @@
+---
+# tasks file for ansible-oracle-java
+
+- name: Check for mandatory variable
+  fail:
+    msg="Please define the variable oracle_java_version"
+  when: oracle_java_version is not defined
+
+- name: Check if java is installed
+  shell: "command -v java"
+  register: java_installed
+  ignore_errors: yes
+  changed_when: false
+
+- name: Get Java version
+  shell: java -version 2>&1 | head -n 1 | sed 's/java version "[0-9].\([0-9]\).*"/\1/'
+  register: java_version
+  changed_when: false
+  when: java_installed.rc == 0
+
+- name: debug java
+  debug: var=java_version
+
+- name: Java install macOS specific tasks
+  include: macos.yml
+  when: ansible_distribution == "MacOSX"
+
+- name: Java install Ubuntu specific tasks
+  include: ubuntu.yml
+  when: ansible_distribution == "Ubuntu"
+
