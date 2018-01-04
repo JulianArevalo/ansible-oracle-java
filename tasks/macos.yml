@@ -8,7 +8,7 @@
   register: temp
 
 - name: Create askpass script
-  shell: printf "#!/bin/sh\necho {{ ansible_ssh_pass }}\n" > {{ temp.path }}/askpass &&  chmod u+x {{ temp.path }}/askpass && export SUDO_ASKPASS={{ temp.path }}/askpass
+  shell: printf "#!/bin/sh\necho {{ java_sudo_pass }}\n" > {{ temp.path }}/askpass &&  chmod u+x {{ temp.path }}/askpass && export SUDO_ASKPASS={{ temp.path }}/askpass
   register: askpass
 
 - name: Install java cask
